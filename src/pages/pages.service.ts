@@ -29,10 +29,12 @@ export class PagesService {
   async removePage(id: number) {
     return await this.pagesModel.destroy({ where: { id } });
   }
-  async returnSource(link: string) {
+  async returnSource(link: any) {
     const source = await this.pagesModel.findOne({
+      attributes: ['content'],
       where: { route: link },
+      raw: true,
     });
-    return source?.content;
+    return source;
   }
 }

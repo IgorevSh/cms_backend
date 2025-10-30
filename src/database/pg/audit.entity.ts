@@ -25,7 +25,7 @@ export class Audit extends Model {
   user_id: number;
 
   @Column({
-    type: DataType.TIME,
+    type: DataType.BIGINT,
   })
   timestamp: number | string;
 

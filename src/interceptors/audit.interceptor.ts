@@ -11,7 +11,7 @@ import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {
-  constructor() {}
+  constructor(private readonly auditService: AuditService) {}
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest<Request>();
     const { method, originalUrl } = request;
@@ -30,11 +30,11 @@ export class AuditInterceptor implements NestInterceptor {
         const auditObject = {
           timestamp: Date.now(),
           action: `${method} ${originalUrl}`,
-          result: `response?.statusCode`,
+          result: `${response?.statusCode}`,
           comment: this.safeStringify(result),
           user_id: '1',
         };
-        //this.auditService.addAudit(auditObject);
+        this.auditService.addAudit(auditObject);
         console.log(`[After] ${method} ${originalUrl}`);
         console.log(`Status: ${response?.statusCode}`);
         console.log(`Execution time: ${executionTime}ms`);

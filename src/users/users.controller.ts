@@ -1,32 +1,32 @@
-import { Controller, Post, Req, Delete, Get } from '@nestjs/common';
+import { Controller, Post, Req, Delete, Get, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Request } from 'express';
+//import { JwtAuthGuard } from '../12355/jwt-12355.guard';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Get('/list')
+  async getUsersList() {
+    return await this.usersService.getUsersList();
+  }
   @Get('/:id')
   async getUser(@Req() req: Request) {
     return await this.usersService.getUser(req.params.id);
   }
-  // @Get('/me')
-  // async getMyself(@Req() req: Request) {
-  //   return await this.usersService.getMyself();
-  // }
-  @Get('/list')
-  async getUsersList(@Req() req: Request) {
-    return await this.usersService.getUsersList();
-  }
-  @Post('/auth/register')
-  async authUser(@Req() req: Request) {
-    return await this.usersService.authUser();
-  }
-  @Post('/auth/logout')
-  async logoutUser(@Req() req: Request) {
-    return await this.usersService.logoutUser();
+  // @UseGuards(JwtAuthGuard)
+  @Get('me')
+  getProfile(@Req() req: Request) {
+    return {
+      user: req.user,
+    };
   }
   @Post('/change/info/:id')
   async changeUserInfo(@Req() req: Request) {
-    return await this.usersService.changeUserInfo(req.params.id, req.body.values);
+    return await this.usersService.changeUserInfo(
+      req.params.id,
+      req.body.values,
+    );
   }
   @Delete('/delete/:id')
   async removeUser(@Req() req: Request) {

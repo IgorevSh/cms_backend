@@ -45,6 +45,11 @@ export class Users extends Model {
   refresh_token: string;
 
   @Column({
+    type: DataType.TEXT,
+  })
+  auth_token: string;
+
+  @Column({
     type: DataType.BOOLEAN,
     defaultValue: false,
   })

@@ -10,11 +10,11 @@ export const DatabaseProviders = [
     useFactory: () => {
       const sequelizePg = new Sequelize({
         dialect: 'postgres',
-        host: '192.168.0.106',
+        host: '127.0.0.1',
         port: '5432',
         username: 'root',
-        password: '123qwe',
-        database: 'cms_database',
+        password: '123qwe123',
+        database: 'postgres',
         logging: false,
         dialectOptions: {
           connectTimeout: 60,

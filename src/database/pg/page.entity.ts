@@ -55,9 +55,4 @@ export class Pages extends Model {
     defaultValue: false,
   })
   auth_required: boolean;
-
-  @Column({
-    type: DataType.BOOLEAN,
-  })
-  is_template: boolean;
 }

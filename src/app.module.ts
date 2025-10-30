@@ -16,11 +16,29 @@ import { AuditModule } from './audit/audit.module';
 import { AuditService } from './audit/audit.service';
 import { UsersService } from './users/users.service';
 import { UsersController } from './users/users.controller';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import { AuditInterceptor } from './interceptors/audit.interceptor';
-//import { AfterMiddleware } from './middleware/after.middleware';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { AuthModule } from './auth/auth.module';
+import { globalProviders } from './database/pg/global.providers';
+import { PassportModule } from '@nestjs/passport';
+
 @Module({
-  imports: [DatabaseModule, PagesModule, UsersModule, RolesModule, AuditModule],
+  imports: [
+    DatabaseModule,
+    PagesModule,
+    UsersModule,
+    PassportModule.register({ session: true }),
+    RolesModule,
+    AuditModule,
+    AuthModule,
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 20,
+        },
+      ],
+    }),
+  ],
   controllers: [
     AppController,
     DatabaseController,
@@ -28,18 +46,17 @@ import { AuditInterceptor } from './interceptors/audit.interceptor';
     UsersController,
     RolesController,
     AuditController,
+    //AuthController,
   ],
   providers: [
+    ...globalProviders,
     AppService,
     UsersService,
     DatabaseService,
     PagesService,
     RolesService,
+    // AuthService,
     AuditService,
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: AuditInterceptor,
-    },
   ],
 })
 export class AppModule {}
