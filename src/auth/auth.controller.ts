@@ -11,6 +11,7 @@ import {
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AuthService } from './auth.service';
 import { IsAuthenticatedGuard } from './guards/is-authenticated';
+import { TokenGuard } from './guards/token.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -19,17 +20,28 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   login(@Request() req, @Res() res) {
-    req.logIn(req.user, (err) => {
-      if (err) {
-        return res.status(400).json({ message: 'Login failed' });
-      }
-      return res.json({ message: 'Login successful', user: req.user });
-    });
+    return res.json({ message: 'Login successful' });
   }
 
   @UseGuards(IsAuthenticatedGuard)
   @Get('profile')
-  getProfile(@Request() req: any, @Session() session) {
-    return req.user;
+  getProfile(@Request() req: any) {
+    return req?.user;
+  }
+
+  @UseGuards(IsAuthenticatedGuard)
+  @Post('logout')
+  logOut(@Session() session) {
+    return this.authService.logout(session);
+  }
+  @UseGuards(TokenGuard)
+  @Post('token')
+  loginWithToken(@Request() req, @Res() res) {
+    req.logIn(req.user, (err) => {
+      if (err) {
+        return res.status(400).json({ message: 'Login failed' });
+      }
+      return res.json({ message: 'Login successful' });
+    });
   }
 }

@@ -5,9 +5,13 @@ import { Pages } from '../database/pg/page.entity';
 export class PagesService {
   constructor(@Inject('PAGES') private pagesModel: typeof Pages) {}
 
-  async getFullStructure() {
+  async getFullStructure(user: any) {
     console.log('request');
-    return await this.pagesModel.findAll();
+    const structureRules: any = JSON.parse(user.roles.structure || '{}');
+    const pagesList = await this.pagesModel.findAll();
+    return pagesList.filter((itm) => {
+      structureRules?.[itm?.id] > 0;
+    });
   }
 
   async getPageById(id: number) {

@@ -1,4 +1,12 @@
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  ForeignKey,
+  BelongsTo,
+} from 'sequelize-typescript';
+import {Roles} from './roles.entity'
 @Table({
   tableName: 'users',
   timestamps: false,
@@ -33,21 +41,25 @@ export class Users extends Model {
     type: DataType.TEXT,
   })
   shadow: string;
-
+  @ForeignKey(() => Roles)
   @Column({
     type: DataType.BIGINT,
   })
   role_id: number;
+  @BelongsTo(() => Roles)
+  id: number;
 
   @Column({
-    type: DataType.TEXT,
+    type: DataType.STRING,
+    allowNull: true,
   })
-  refresh_token: string;
+  twoFactorCode: string;
 
   @Column({
-    type: DataType.TEXT,
+    type: DataType.STRING,
+    allowNull: true,
   })
-  auth_token: string;
+  twoFactorExpiresAt: string;
 
   @Column({
     type: DataType.BOOLEAN,

@@ -1,10 +1,14 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
+import { Users } from '../database/pg/users.entity';
 
 @Injectable()
 export class AuthService {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    @Inject('USERS') private userModel: typeof Users,
+    private usersService: UsersService,
+  ) {}
 
   async validateUser(login: string, pass: string): Promise<any> {
     const user = await this.usersService.findByMailOrPhone(login);
@@ -17,12 +21,30 @@ export class AuthService {
     return null;
   }
 
-  async login(user: any): Promise<{ message: string,user:any }> {
-    return { message: 'Login successful',user };
+  async generate2FACode(user: Users): Promise<void> {
+    const code = Math.floor(1000 + Math.random() * 9000).toString();
+    const expires = (Date.now() + 5 * 60 * 1000).toString();
+    await this.usersService.save2FACode(user.id, code, expires);
   }
 
-  async logout(session: any): Promise<{ message: string }> {
-    session.destroy((err) => {
+  async verify2FACode(email: string, code: string) {
+    const user = await this.userModel.findOne({ where: { email } });
+    if (
+      !(
+        !user ||
+        user.twoFactorCode !== code ||
+        parseFloat(user?.twoFactorExpiresAt) < Date.now()
+      )
+    ) {
+      await this.usersService.delete2FACode(user.id);
+      return user
+    } else {
+      throw new UnauthorizedException('Неверный или истёкший код');
+    }
+  }
+
+  logout(session: any): { message: string } {
+    session?.destroy((err) => {
       if (err) {
         throw new UnauthorizedException('Logout failed');
       }
@@ -33,21 +55,10 @@ export class AuthService {
 
   async register(email: string, password: string, name: string): Promise<any> {
     const hashedPassword = await bcrypt.hash(password, 10);
-
     return this.usersService.addUser({
       email,
       password: hashedPassword,
       name,
     });
-  }
-
-  getCurrentUser(session: any): { userId: number; email: string } {
-    if (!session.isAuthenticated) {
-      throw new UnauthorizedException('Not authenticated');
-    }
-    return {
-      userId: session.userId,
-      email: session.email,
-    };
   }
 }

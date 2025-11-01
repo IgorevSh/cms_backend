@@ -9,17 +9,28 @@ export class UsersService {
   async getUser(id) {
     return await this.userModel.findOne(id);
   }
-
   async findByEmail(email: string): Promise<any> {
     return this.userModel.findOne({
       where: { mail: email },
       raw: true,
     });
   }
-  async updateAuthKey(userId: number, key: string | null) {
-    await this.userModel.update({ auth_key: key }, { where: { id: userId } });
+  async save2FACode(
+    userId: number,
+    code: string,
+    expires: string,
+  ): Promise<any> {
+    await this.userModel.update(
+      { twoFactorCode: code, twoFactorExpiresAt: expires },
+      { where: { id: userId } },
+    );
   }
-
+  async delete2FACode(userId: number): Promise<any> {
+    await this.userModel.update(
+      { twoFactorCode: null, twoFactorExpiresAt: null },
+      { where: { id: userId } },
+    );
+  }
   async getUsersList() {
     return await this.userModel.findAll();
   }
@@ -29,18 +40,9 @@ export class UsersService {
         [Op.or]: [{ mail: login }, { phone: login }],
       },
       raw: true,
-      //  include: [Roles],
+      include: [Roles],
     });
   }
-
-  async findById(id: number) {
-    return this.userModel.findByPk(id, { raw: true });
-  }
-
-  async updateRefreshToken(id: number, token: string) {
-    await this.userModel.update({ refresh_token: token }, { where: { id } });
-  }
-  async addUser(values: any): Promise<any> {}
   async changeUserInfo(id, values) {
     return await this.userModel.update(values, {
       where: { id },
@@ -50,5 +52,8 @@ export class UsersService {
     return await this.userModel.destroy({
       where: { id },
     });
+  }
+  async addUser(values: any) {
+    return await this.userModel.create(values);
   }
 }
