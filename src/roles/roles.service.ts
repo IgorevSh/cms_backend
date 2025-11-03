@@ -1,6 +1,7 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Roles } from '../database/pg/roles.entity';
 import sequelize, { Op } from 'sequelize';
+import { RoleDTO } from '../dto/role.dto';
 
 @Injectable()
 export class RolesService {
@@ -10,16 +11,15 @@ export class RolesService {
   ) {}
 
   async getFullStructure(): Promise<any> {
-    const roles = await this.rolesModel.findAll({
+    return await this.rolesModel.findAll({
       where: {
         id: {
           [Op.ne]: 1,
         },
       },
     });
-    return roles;
   }
-  async getRoleById(roleId): Promise<any> {
+  async getRoleById(roleId: string): Promise<any> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     const [results] = await this.rolesModel.sequelize.query(
@@ -50,17 +50,17 @@ export class RolesService {
     return results;
   }
 
-  async createRules(values): Promise<any> {
+  async createRules(values: Roles): Promise<any> {
     return await this.rolesModel.create(values);
   }
 
-  async upsertRules(id, values): Promise<any> {
+  async upsertRules(id: string, values: Roles): Promise<any> {
     return await this.rolesModel.update(values, {
       where: { id },
     });
   }
 
-  async removeRole(id): Promise<any> {
+  async removeRole(id: string): Promise<any> {
     return await this.rolesModel.destroy({
       where: { id },
     });

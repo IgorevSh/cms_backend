@@ -1,7 +1,17 @@
-import { Controller, Delete, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { Request } from 'express';
 import { RolesGuard } from './guards/roles.guard';
+import { RoleDTO } from '../dto/role.dto';
+
 @UseGuards(RolesGuard)
 @Controller('roles')
 export class RolesController {
@@ -16,17 +26,16 @@ export class RolesController {
     return await this.rolesService.getRoleById(id);
   }
   @Post('/create')
-  async createRules(@Req() req: Request): Promise<any> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const values = req?.body.values;
-    return await this.rolesService.createRules(values);
+  async createRules(@Body() rolesValue: RoleDTO): Promise<any> {
+    return await this.rolesService.createRules(rolesValue);
   }
   @Post('/upsert/:id')
-  async upsertRules(@Req() req: Request): Promise<any> {
+  async upsertRules(
+    @Req() req: Request,
+    @Body() rolesValue: RoleDTO,
+  ): Promise<any> {
     const id = req.params.id;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const values = req?.body.values;
-    return await this.rolesService.upsertRules(id, values);
+    return await this.rolesService.upsertRules(id, rolesValue);
   }
   @Delete('/remove/:id')
   async removeRole(@Req() req: Request): Promise<any> {

@@ -5,13 +5,13 @@ import { AuditService } from './audit/audit.service';
 import { createClient } from 'redis';
 import { RedisStore } from 'connect-redis';
 import * as session from 'express-session';
+import * as csurf from 'csurf';
 import * as passport from 'passport';
 import helmet from 'helmet';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  //@ts-expect-error
   app.set('trust proxy', 1);
 
   // Redis client
@@ -41,7 +41,7 @@ async function bootstrap() {
         secure: false, // если без HTTPS
         httpOnly: true,
         sameSite: 'lax',
-        maxAge: 1000 * 60 * 60 * 24 * 3,
+        maxAge: 1000 * 60 * 60 * 24 * 1,
       },
     }),
   );
@@ -53,10 +53,20 @@ async function bootstrap() {
 
   app.use(
     helmet({
-      contentSecurityPolicy: false,
+      contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+          ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+          'script-src': ["'self'", "'unsafe-inline'"], // Разрешение inline-скриптов
+        },
+      },
+      referrerPolicy: { policy: 'no-referrer' },
+      frameguard: { action: 'deny' }, // Запрещает использование фреймов
+      hidePoweredBy: true, // Скрывает заголовок X-Powered-By
+      xssFilter: true, // Включает фильтрацию XSS
     }),
   );
-
+  app.use(csurf({ cookie: true }));
   app.enableCors({
     origin: 'http://localhost:9000',
     credentials: true,

@@ -14,7 +14,7 @@ export class AuditGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const request: Request = context.switchToHttp().getRequest();
-    const user = request.user;
+    const user: any = request.user;
     const roles: Roles = user?.roles;
 
     if (!roles) {

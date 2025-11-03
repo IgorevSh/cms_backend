@@ -24,7 +24,7 @@ export class AuthService {
   async generate2FACode(user: Users): Promise<void> {
     const code = Math.floor(1000 + Math.random() * 9000).toString();
     const expires = (Date.now() + 5 * 60 * 1000).toString();
-    await this.usersService.save2FACode(user.id, code, expires);
+    await this.usersService.save2FACode(user, code, expires);
   }
 
   async verify2FACode(email: string, code: string) {

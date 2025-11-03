@@ -19,7 +19,7 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  login(@Request() req, @Res() res) {
+  login(@Res() res) {
     return res.json({ message: 'Login successful' });
   }
 
@@ -43,5 +43,9 @@ export class AuthController {
       }
       return res.json({ message: 'Login successful' });
     });
+  }
+  @Get('token')
+  getCsrfToken(@Request() req: Request, @Res() res: Response) {
+    return res.json({ csrfToken: req?.csrfToken() });
   }
 }
